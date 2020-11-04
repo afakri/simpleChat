@@ -23,6 +23,7 @@ public class EchoServer extends AbstractServer
    * The default port to listen on.
    */
   final public static int DEFAULT_PORT = 5555;
+
   
   //Constructors ****************************************************
   
@@ -51,6 +52,56 @@ public class EchoServer extends AbstractServer
     System.out.println("Message received: " + msg + " from " + client);
     this.sendToAllClients(msg);
   }
+  
+  public void handleMessageFromServerUI(String message){
+	  if(message.charAt(0)=='#') {
+		  try {
+			  String[] splittedMessage = message.split(" ", 2);
+			  switch (splittedMessage[0]){ 
+			  	  case "#quit" : System.exit(0);
+			  	  	break;	
+				  case "#stop" : stopListening();
+				  	break;
+				  case "#close": close();
+				  	break;
+				  case "#setport":
+				  	if(!isListening()&& this.getNumberOfClients() < 1) {
+				  		setPort(Integer.parseInt(splittedMessage[1].replace("<", "").replace(">", "")));
+
+				  	}
+					else{
+						throw new IOException("Please close the server before setting port");
+					}
+				  	break;
+				  case "#start":
+					if(!isListening()) {
+						listen();
+				  	}
+					else{
+						throw new IOException("The server is currently listening");
+					}
+					break;
+				  case "#getport":
+					  System.out.println("Port: "+ getPort());
+					  break;
+				  default:
+					  throw new IOException("Invalid Command"); 
+				  	
+			  }
+		  }
+		  catch(IOException e) {
+			  System.out.println(e);
+		  }
+	  }
+	  else {
+		  sendToAllClients("SERVER MSG>" + message);
+		  System.out.println("> "+message);
+	  }
+
+  }
+  	
+	  
+
     
   /**
    * This method overrides the one in the superclass.  Called
